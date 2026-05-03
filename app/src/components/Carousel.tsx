@@ -4,7 +4,7 @@ import "./css/Carousel.css";
 import { ChildCare } from "@mui/icons-material";
 
 export const CarouselItem = (props: {
-    children?: JSX.Element;
+    children?: React.ReactElement;
     key?: string;
     style?: React.CSSProperties;
 }) => {
@@ -19,7 +19,7 @@ export const CarouselItem = (props: {
 };
 
 type CarouselProps = {
-    children: JSX.Element[] | JSX.Element;
+    children: React.ReactElement[] | React.ReactElement;
     activeIndex: number;
     style?: React.CSSProperties;
 };

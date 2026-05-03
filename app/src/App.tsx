@@ -1,66 +1,85 @@
-import React, { useState } from "react";
-import { teal, yellow } from "@mui/material/colors";
-import {
-    createTheme,
-    ThemeProvider,
-    responsiveFontSizes,
-} from "@mui/material/styles";
+import { Suspense, lazy, useCallback, useEffect, useState } from "react";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
+import theme from "./theme";
 import { NavBar } from "./components/NavBar";
-import Stylize from "./components/Stylize";
-import Result from "./components/Result";
 import Landing from "./components/Landing";
 
-let theme = createTheme({
-    palette: {
-        primary: {
-            //   light: teal['A100'],
-            main: yellow["A100"],
-        },
-        secondary: {
-            main: teal["A100"],
-        },
-    },
-    typography: {
-        fontFamily: ["Roboto", '"Helvetica Neue"'].join(", "),
-        h1: { fontWeight: 700 },
-        h3: { fontWeight: 700 },
-        h5: { fontWeight: 700 },
-        h4: { fontWeight: 700 },
-    },
-});
+const Stylize = lazy(() => import("./components/Stylize"));
+const Result = lazy(() => import("./components/Result"));
 
-theme = responsiveFontSizes(theme);
+const RouteFallback = () => (
+    <div className="route-fallback" aria-live="polite" aria-busy="true">
+        <span className="route-fallback__dot" />
+        <span className="route-fallback__dot" />
+        <span className="route-fallback__dot" />
+    </div>
+);
 
 const App = () => {
-    const [resultImage, setResultImage] = useState<string | undefined>(
-        undefined
-    );
+    const [resultUrl, setResultUrl] = useState<string | undefined>(undefined);
+
+    const updateResult = useCallback((next: string | undefined) => {
+        setResultUrl((prev) => {
+            if (prev && prev.startsWith("blob:") && prev !== next) {
+                URL.revokeObjectURL(prev);
+            }
+            return next;
+        });
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (resultUrl && resultUrl.startsWith("blob:")) {
+                URL.revokeObjectURL(resultUrl);
+            }
+        };
+    }, [resultUrl]);
+
     return (
-        <BrowserRouter>
-            <ThemeProvider theme={theme}>
-                <SnackbarProvider autoHideDuration={2000}>
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <SnackbarProvider
+                autoHideDuration={2400}
+                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+                <BrowserRouter>
+                    <a className="skip-link" href="#main">
+                        Skip to content
+                    </a>
                     <NavBar />
-                    <Routes>
-                        <Route index element={<Landing />} />
-                        <Route
-                            path="stylize"
-                            element={
-                                <Stylize
-                                    image={resultImage}
-                                    setImage={setResultImage}
+                    <main className="page" id="main">
+                        <Suspense fallback={<RouteFallback />}>
+                            <Routes>
+                                <Route index element={<Landing />} />
+                                <Route
+                                    path="stylize"
+                                    element={
+                                        <Stylize
+                                            resultUrl={resultUrl}
+                                            setResultUrl={updateResult}
+                                        />
+                                    }
                                 />
-                            }
-                        />
-                        <Route
-                            path="result"
-                            element={<Result image={resultImage} />}
-                        />
-                    </Routes>
-                </SnackbarProvider>
-            </ThemeProvider>
-        </BrowserRouter>
+                                <Route
+                                    path="result"
+                                    element={
+                                        <Result
+                                            resultUrl={resultUrl}
+                                            clearResult={() =>
+                                                updateResult(undefined)
+                                            }
+                                        />
+                                    }
+                                />
+                            </Routes>
+                        </Suspense>
+                    </main>
+                </BrowserRouter>
+            </SnackbarProvider>
+        </ThemeProvider>
     );
 };
 

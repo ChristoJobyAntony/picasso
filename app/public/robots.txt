@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /stylize
+Disallow: /stylizeb64
+Disallow: /healthz
+
+Sitemap: https://picasso.example/sitemap.xml

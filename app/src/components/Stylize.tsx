@@ -1,260 +1,241 @@
-import { useEffect, useState } from "react";
-import {
-    Typography,
-    Button,
-    Grid,
-    Box,
-    Card,
-    IconButton,
-    CircularProgress,
-    Backdrop,
-} from "@mui/material";
-import api from "./api";
-import React from "react";
-import DisplayCard from "./DisplayCard";
-import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
+import { useEffect, useRef, useState } from "react";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import CircularProgress from "@mui/material/CircularProgress";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-
-import Carousel, { CarouselItem } from "./Carousel";
-import { redirect, useNavigate } from "react-router-dom";
+import UploadIcon from "@mui/icons-material/UploadFileOutlined";
+import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
+import api, { StyleInfo } from "./api";
 
-interface props {
-    image: string | undefined;
-    setImage: React.Dispatch<React.SetStateAction<string | undefined>>;
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg"];
+
+interface Props {
+    resultUrl: string | undefined;
+    setResultUrl: (next: string | undefined) => void;
 }
 
-export const Stylize = (props: props) => {
+export const Stylize = ({ setResultUrl }: Props) => {
     const navigate = useNavigate();
-    const [userImage, setUserImage] = useState("sample_portrait.jpg");
-    const [userImageFile, setUserImageFile] = useState<File>();
-    const [selectImagePrompt, setSelectImagePrompt] =
-        useState("Select an Image");
-    const [activeIndex, setActiveIndex] = useState(1);
+    const { enqueueSnackbar } = useSnackbar();
+
+    const [userImageUrl, setUserImageUrl] = useState<string | undefined>();
+    const [userImageFile, setUserImageFile] = useState<File | undefined>();
+    const [styles, setStyles] = useState<StyleInfo[]>([]);
+    const [activeIndex, setActiveIndex] = useState(0);
     const [loading, setLoading] = useState(false);
-    const {enqueueSnackbar, closeSnackbar} = useSnackbar();
-    const [stylesInfo, setStylesInfo] = useState<
-        | Array<{ id: string; title: any; file: any; description: any }>
-        | undefined
-    >(undefined);
-    const onFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (!files || files.length < 1)
-            return console.log("No file selected !");
-        setUserImageFile(files[0]);
-        setUserImage(URL.createObjectURL(files[0]));
-        setSelectImagePrompt("Image to Style Transfer");
-    };
-
-    const onNextSlide = () => {
-        setActiveIndex(activeIndex + 1);
-    };
-
-    const onPrevSlide = () => {
-        setActiveIndex(activeIndex - 1);
-    };
-
-    const enqueueRequest = async () => {
-        if (userImageFile === undefined)
-            return enqueueSnackbar("Please select an image to stylize");
-        setLoading(true);
-        api.send_files(userImageFile!, stylesInfo![activeIndex].id).then(
-            (data) => {
-                setLoading(false);
-                console.log(data);
-                props.setImage(data);
-                navigate("/result");
-            }
-        );
-    };
+    const [dragOver, setDragOver] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
+        api.getStyles()
+            .then(setStyles)
+            .catch(() => {
+                enqueueSnackbar(
+                    "Could not load styles. Refresh to try again.",
+                    { variant: "error" }
+                );
+            });
+    }, [enqueueSnackbar]);
+
+    useEffect(() => {
+        return () => {
+            if (userImageUrl) URL.revokeObjectURL(userImageUrl);
+        };
+    }, [userImageUrl]);
+
+    const acceptFile = (file: File) => {
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+            enqueueSnackbar("Please choose a PNG or JPEG image.");
+            return;
+        }
+        if (file.size > MAX_UPLOAD_BYTES) {
+            enqueueSnackbar("That image is over 10 MB. Try a smaller one.");
+            return;
+        }
+        if (userImageUrl) URL.revokeObjectURL(userImageUrl);
+        setUserImageFile(file);
+        setUserImageUrl(URL.createObjectURL(file));
+    };
+
+    const onFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) acceptFile(file);
+    };
+
+    const onDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+        e.preventDefault();
+        setDragOver(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file) acceptFile(file);
+    };
+
+    const onPrev = () => setActiveIndex((i) => Math.max(0, i - 1));
+    const onNext = () =>
+        setActiveIndex((i) => Math.min(styles.length - 1, i + 1));
+
+    const submit = async () => {
+        if (!userImageFile) {
+            enqueueSnackbar("Choose a photo to begin.");
+            return;
+        }
+        if (styles.length === 0) return;
         setLoading(true);
-        api.get_styles().then((styles) => {
-            setStylesInfo(styles);
+        try {
+            const blob = await api.sendFiles(
+                userImageFile,
+                styles[activeIndex].id
+            );
+            setResultUrl(URL.createObjectURL(blob));
+            navigate("/result");
+        } catch {
+            enqueueSnackbar("Stylization failed — try a different image.", {
+                variant: "error",
+            });
+        } finally {
             setLoading(false);
-        });
-    }, []);
+        }
+    };
+
+    const activeStyle = styles[activeIndex];
+    const canSubmit = !loading && !!userImageFile && styles.length > 0;
+
     return (
-        <Box
-            sx={{
-                height: "100%",
-                width: "100%",
-                display: "flex",
-                marginTop: "5px",
-                marginLeft: "5px",
-            }}
-        >
-            <Backdrop
-                sx={{
-                    color: "#fff",
-                    zIndex: (theme) => theme.zIndex.drawer + 1,
-                }}
-                open={loading}
-            >
-                <CircularProgress color="inherit" />
-            </Backdrop>
-            <Box
-                sx={{
-                    width: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flex: 1,
-                }}
-            >
-                <DisplayCard>
-                    <Box
-                        sx={{
-                            width: "100%",
-                            display: "flex",
-                            marginTop: "10px",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flex: 1,
-                        }}
-                    >
-                        <Button
-                            component="label"
-                            variant="text"
-                            sx={{
-                                backgroundImage: `url('${userImage}')`,
-                                backgroundPosition: "center",
-                                backgroundRepeat: "no-repeat",
-                                backgroundSize: "cover",
-                                alignItems: "flex-end",
-                                width: "90%",
-                                height: "90%",
-                            }}
-                        >
-                            <Typography
-                                variant="h4"
-                                sx={{
-                                    backgroundColor: "rgba(0,0,0, 0.4)",
-                                    padding: "10px",
-                                    borderRadius: "10px",
-                                }}
-                            >
-                                {selectImagePrompt}
-                            </Typography>
-                            <input
-                                type="file"
-                                hidden
-                                onChange={onFileSelected}
-                            />
-                        </Button>
-                    </Box>
-                </DisplayCard>
-            </Box>
+        <section className="stylize container">
+            <title>Stylize a photo — Picasso</title>
+            <meta
+                name="description"
+                content="Upload your photo and choose a master painting to restyle it with neural style transfer."
+            />
+            <meta name="robots" content="noindex" />
+            <header className="stylize__head">
+                <p className="eyebrow">Compose your piece</p>
+                <h1 className="stylize__title">Make your masterpiece</h1>
+            </header>
 
-            <Box
-                sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                }}
-            >
-                <IconButton color="secondary" onClick={enqueueRequest}>
-                    <CompareArrowsIcon
-                        sx={{
-                            fontSize: "3rem",
+            <div className="stylize__grid">
+                <div className="stylize__col">
+                    <h2 className="stylize__col-title">Your photo</h2>
+                    <label
+                        className={`dropzone${userImageUrl ? " dropzone--filled" : ""}${dragOver ? " dropzone--drag" : ""}`}
+                        onDrop={onDrop}
+                        onDragOver={(e) => {
+                            e.preventDefault();
+                            if (!dragOver) setDragOver(true);
                         }}
-                    />
-                </IconButton>
-            </Box>
-
-            <Box
-                sx={{
-                    width: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                }}
-            >
-                <DisplayCard>
-                    <Box
-                        sx={{
-                            width: "100%",
-                            display: "flex",
-                            marginTop: "10px",
-                            marginBottom: "10px",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flex: 1,
-                            flexDirection: "row",
-                            padding: "10px",
-                            borderRadius: "4px",
-                        }}
+                        onDragLeave={() => setDragOver(false)}
                     >
-                        <IconButton
-                            disabled={activeIndex == 0 ? true : false}
-                            size="large"
-                            color="secondary"
-                            onClick={onPrevSlide}
-                        >
-                            <NavigateBeforeIcon
-                                sx={{
-                                    fontSize: "2.5rem",
-                                }}
+                        {userImageUrl ? (
+                            <img
+                                src={userImageUrl}
+                                alt="Your selected photo"
+                                className="dropzone__img"
                             />
-                        </IconButton>
-                        <Carousel
-                            activeIndex={activeIndex}
-                            style={{
-                                margin: "10px",
-                            }}
+                        ) : (
+                            <div className="dropzone__empty">
+                                <UploadIcon fontSize="large" />
+                                <span className="dropzone__hint">
+                                    Drop a photo, or click to upload
+                                </span>
+                                <span className="dropzone__sub">
+                                    PNG or JPEG &middot; up to 10&nbsp;MB
+                                </span>
+                            </div>
+                        )}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/png,image/jpeg"
+                            hidden
+                            onChange={onFileSelected}
+                        />
+                    </label>
+                    {userImageUrl && (
+                        <button
+                            type="button"
+                            className="link-btn"
+                            onClick={() => fileInputRef.current?.click()}
                         >
-                            {stylesInfo === undefined ? (
-                                <CarouselItem
-                                    key="index"
-                                    style={{
-                                        backgroundImage: `url('/styles/style_1.jpg')`,
-                                        backgroundPosition: "center",
-                                        backgroundRepeat: "no-repeat",
-                                        backgroundSize: "cover",
-                                        font: "Times New Roman",
-                                    }}
+                            Replace photo
+                        </button>
+                    )}
+                </div>
+
+                <div className="stylize__col">
+                    <h2 className="stylize__col-title">Master</h2>
+                    <div className="picker">
+                        <div className="picker__frame">
+                            {activeStyle ? (
+                                <img
+                                    src={api.getStyleImagePath(activeStyle.id)}
+                                    alt={activeStyle.title}
+                                    className="picker__img"
+                                    loading="lazy"
+                                    decoding="async"
                                 />
                             ) : (
-                                stylesInfo.map((style) => (
-                                    <CarouselItem
-                                        key={style.id}
-                                        style={{
-                                            backgroundImage: `url('${api.get_style_image_path(
-                                                style.id
-                                            )}')`,
-                                            backgroundPosition: "center",
-                                            backgroundRepeat: "no-repeat",
-                                            backgroundSize: "cover",
-                                            font: "Times New Roman",
-                                        }}
-                                    />
-                                ))
+                                <div
+                                    className="picker__placeholder"
+                                    aria-hidden="true"
+                                />
                             )}
-                        </Carousel>
-                        <IconButton
-                            disabled={
-                                stylesInfo === undefined
-                                    ? true
-                                    : activeIndex == stylesInfo.length - 1
-                                    ? true
-                                    : false
-                            }
-                            size="large"
-                            color="secondary"
-                            onClick={onNextSlide}
-                        >
-                            <NavigateNextIcon
-                                sx={{
-                                    fontSize: "2.5rem",
-                                }}
-                            />
-                        </IconButton>
-                    </Box>
-                </DisplayCard>
-            </Box>
-        </Box>
+                        </div>
+                        <div className="picker__controls">
+                            <IconButton
+                                onClick={onPrev}
+                                disabled={activeIndex === 0}
+                                size="medium"
+                                aria-label="Previous master"
+                            >
+                                <NavigateBeforeIcon />
+                            </IconButton>
+                            <div className="picker__meta">
+                                <p className="picker__title">
+                                    {activeStyle?.title ?? "—"}
+                                </p>
+                                <p className="picker__desc">
+                                    {activeStyle?.description ?? ""}
+                                </p>
+                                <p className="picker__count">
+                                    {styles.length > 0
+                                        ? `${activeIndex + 1} / ${styles.length}`
+                                        : ""}
+                                </p>
+                            </div>
+                            <IconButton
+                                onClick={onNext}
+                                disabled={activeIndex >= styles.length - 1}
+                                size="medium"
+                                aria-label="Next master"
+                            >
+                                <NavigateNextIcon />
+                            </IconButton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="stylize__action">
+                <Button
+                    onClick={submit}
+                    disabled={!canSubmit}
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                >
+                    {loading ? (
+                        <CircularProgress
+                            size={20}
+                            sx={{ color: "var(--paper)" }}
+                        />
+                    ) : (
+                        "Stylize"
+                    )}
+                </Button>
+            </div>
+        </section>
     );
 };
 

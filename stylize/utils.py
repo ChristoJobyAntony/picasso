@@ -1,10 +1,12 @@
-import os
 import tensorflow as tf
 import numpy as np
 import PIL.Image
-import tensorflow_hub as hub
-from matplotlib import pyplot as plt
-from io import BytesIO, StringIO
+from io import BytesIO
+
+from PIL import UnidentifiedImageError
+
+
+MAX_DIMENSION = 512
 
 
 def tensor_to_image(tensor: tf.Tensor) -> PIL.Image:
@@ -19,12 +21,19 @@ def tensor_to_image(tensor: tf.Tensor) -> PIL.Image:
     return PIL.Image.fromarray(tensor)
 
 
-def load_img(path_to_img : str) -> tf.Tensor:
+def _validate_image_size(img: PIL.Image.Image, max_pixels: int | None = None) -> None:
+    if max_pixels is not None and img.width * img.height > max_pixels:
+        raise ValueError("Image dimensions are too large")
+
+
+def load_img(path_to_img: str, max_pixels: int | None = None) -> tf.Tensor:
     """Takes path to file as input, returns a Tensor
     Performs the following operations:
     - Scales the image so the longest dimension of the image shape is 512
     - Expands dimensions in front"""
-    max_dim = 512
+    with PIL.Image.open(path_to_img) as pil_image:
+        _validate_image_size(pil_image, max_pixels=max_pixels)
+
     img = tf.io.read_file(path_to_img)
     img = tf.image.decode_image(img, channels=3)
     img = tf.image.convert_image_dtype(img, tf.float32)
@@ -32,7 +41,7 @@ def load_img(path_to_img : str) -> tf.Tensor:
     # Also removes the last element (The number of channels)
     shape = tf.cast(tf.shape(img)[:-1], tf.float32)
     long_dim = max(shape)
-    scale = max_dim / long_dim
+    scale = MAX_DIMENSION / long_dim
 
     new_shape = tf.cast(shape * scale, tf.int32)
 
@@ -40,19 +49,25 @@ def load_img(path_to_img : str) -> tf.Tensor:
     img = img[tf.newaxis, :]
     return img
 
-def load_img_from_bytesio(img : BytesIO) -> tf.Tensor:
+def load_img_from_bytesio(img: BytesIO, max_pixels: int | None = None) -> tf.Tensor:
     """Takes a BytesIO object as input, returns a Tensor
     Performs the following operations:
     - Scales the image so the longest dimension of the image shape is 512
     - Expands dimensions in front"""
-    max_dim = 512
-    img = tf.image.decode_image(img.read(), channels=3)
+    raw_image = img.read()
+    try:
+        with PIL.Image.open(BytesIO(raw_image)) as pil_image:
+            _validate_image_size(pil_image, max_pixels=max_pixels)
+    except UnidentifiedImageError as exc:
+        raise ValueError("Invalid image file") from exc
+
+    img = tf.image.decode_image(raw_image, channels=3)
     img = tf.image.convert_image_dtype(img, tf.float32)
     # Takes the shape of the image, which is a tensor and converts it to an array of 32-bit floats
     # Also removes the last element (The number of channels)
     shape = tf.cast(tf.shape(img)[:-1], tf.float32)
     long_dim = max(shape)
-    scale = max_dim / long_dim
+    scale = MAX_DIMENSION / long_dim
 
     new_shape = tf.cast(shape * scale, tf.int32)
 

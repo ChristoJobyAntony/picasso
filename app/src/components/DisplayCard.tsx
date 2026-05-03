@@ -3,7 +3,7 @@ import { useTheme } from "@mui/material/styles";
 import React from "react";
 
 type props = {
-    children: JSX.Element;
+    children: React.ReactElement;
     style?: React.CSSProperties;
 };
 

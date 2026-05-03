@@ -1,38 +1,50 @@
 import axios from "axios";
 
-const base_api = axios.create({
-    baseURL: "http://localhost:8000/",
-    timeout: 5000,
-    timeoutErrorMessage: "Network Error",
+const apiBaseUrl =
+    typeof window !== "undefined" && window.location.port === "3000"
+        ? "http://localhost:8000/"
+        : "/";
+
+const baseApi = axios.create({
+    baseURL: apiBaseUrl,
+    timeout: 60000,
+    timeoutErrorMessage: "Network error — please try again.",
 });
 
-export const send_files = async (image_dir: File, style_dir: string) => {
-    const config = {
-        headers: {
-            Accept: "application/json",
-            "content-type": "multipart/form-data",
-        },
-    };
+export interface StyleInfo {
+    id: string;
+    title: string;
+    file: string;
+    description: string;
+}
+
+export const sendFiles = async (
+    image: File,
+    styleId: string
+): Promise<Blob> => {
     const formData = new FormData();
-    formData.append("style", style_dir);
-    formData.append("image", image_dir);
-    const res = await base_api.post("stylizeb64", formData, config);
+    formData.append("style", styleId);
+    formData.append("image", image);
+    const res = await baseApi.post("stylize", formData, {
+        responseType: "blob",
+        headers: {
+            Accept: "image/png",
+            "Content-Type": "multipart/form-data",
+        },
+    });
+    return res.data as Blob;
+};
+
+export const getStyles = async (): Promise<StyleInfo[]> => {
+    const res = await baseApi.get<StyleInfo[]>("styles/info");
     return res.data;
 };
 
-export const get_styles = async (): Promise<
-    Array<{ id: string; title: any; file: any; description: any }>
-> => {
-    const res = await base_api.get("styles/info");
-    return res.data;
-};
-
-export const get_style_image_path = (image_code: string) => {
-    return base_api.defaults.baseURL + "styles/image/" + image_code;
-};
+export const getStyleImagePath = (styleId: string): string =>
+    `${baseApi.defaults.baseURL}styles/image/${styleId}`;
 
 export default {
-    send_files,
-    get_styles,
-    get_style_image_path,
+    sendFiles,
+    getStyles,
+    getStyleImagePath,
 };

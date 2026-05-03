@@ -1,69 +1,63 @@
-import { useTheme } from "@mui/material/styles";
-import { Box, Button, Typography } from "@mui/material";
-import React, { useEffect } from "react";
-import { useNavigate, redirect } from "react-router-dom";
-import DisplayCard from "./DisplayCard";
-import ReplayIcon from "@mui/icons-material/Replay";
+import { useEffect } from "react";
+import Button from "@mui/material/Button";
+import { Link, useNavigate } from "react-router-dom";
+import RestartAltIcon from "@mui/icons-material/RestartAltOutlined";
+import DownloadIcon from "@mui/icons-material/FileDownloadOutlined";
 
-interface props {
-    image: string | undefined;
+interface Props {
+    resultUrl: string | undefined;
+    clearResult: () => void;
 }
 
-export const Result = (props: props) => {
-    // const url = window.URL.createObjectURL(props.image);
-    const theme = useTheme();
+export const Result = ({ resultUrl, clearResult }: Props) => {
     const navigate = useNavigate();
+
     useEffect(() => {
-        if (props.image === undefined) {
-            navigate("/stylize");
-            console.log("hit");
-        }
-    }, []);
+        if (!resultUrl) navigate("/stylize", { replace: true });
+    }, [resultUrl, navigate]);
+
+    if (!resultUrl) return null;
 
     return (
-        <Box
-            sx={{
-                height: "100%",
-                width: "100%",
-                display: "flex",
-                marginTop: "5px",
-                marginLeft: "5px",
-                justifyContent: "space-around",
-                alignItems: "center",
-                flexDirection: "column",
-            }}
-        >
-            <Typography variant="h3" color={theme.palette.secondary.main}>
-                et Voilà !
-            </Typography>
-
-            <DisplayCard
-                style={{
-                    height: "60%",
-                    width: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "10px",
-                }}
-            >
+        <section className="result container">
+            <title>Your masterpiece — Picasso</title>
+            <meta name="robots" content="noindex" />
+            <header className="result__head">
+                <p className="eyebrow">Your piece</p>
+                <h1 className="result__title">et Voil&agrave;</h1>
+            </header>
+            <figure className="result__figure">
                 <img
-                    src={`data:image/png;base64,${props.image}`}
-                    style={{
-                        height: "100%",
-                    }}
+                    src={resultUrl}
+                    alt="Your stylized image"
+                    className="result__img"
+                    decoding="async"
                 />
-            </DisplayCard>
-
-            <Button
-                size="large"
-                variant="contained"
-                startIcon={<ReplayIcon />}
-                onClick={() => navigate("/stylize")}
-            >
-                Try Again
-            </Button>
-        </Box>
+            </figure>
+            <div className="result__actions">
+                <Button
+                    component="a"
+                    href={resultUrl}
+                    download="picasso.png"
+                    variant="contained"
+                    color="primary"
+                    startIcon={<DownloadIcon />}
+                    size="large"
+                >
+                    Download
+                </Button>
+                <Button
+                    component={Link}
+                    to="/stylize"
+                    onClick={() => clearResult()}
+                    variant="outlined"
+                    startIcon={<RestartAltIcon />}
+                    size="large"
+                >
+                    Try another
+                </Button>
+            </div>
+        </section>
     );
 };
 

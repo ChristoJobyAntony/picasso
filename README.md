@@ -113,6 +113,30 @@ before the forward pass. 512 is the default; 768–1024 are reasonable on a
 4-core ARM instance if you want larger output, at the cost of latency and
 RAM. Rough scaling: doubling the long edge ~4× the inference cost.
 
+This same env var is read **twice**:
+
+- **At runtime by the Python backend**, in [`stylize/utils.py`](stylize/utils.py),
+  to control the actual resize behavior.
+- **At build time by Vite**, in [`app/vite.config.ts`](app/vite.config.ts), to
+  bake the value into the displayed UI copy ("inputs are resized to N px").
+
+The Docker setup wires both through a single shell variable. To deploy at a
+different resolution:
+
+```sh
+PICASSO_INFERENCE_MAX_DIMENSION=1024 docker compose up --build
+```
+
+For local dev, set it in both shells (frontend build and backend run):
+
+```sh
+# backend
+PICASSO_INFERENCE_MAX_DIMENSION=1024 poetry run python -m uvicorn app:app
+
+# frontend
+PICASSO_INFERENCE_MAX_DIMENSION=1024 npm run build   # or `npm run dev`
+```
+
 If the React app is served by the same FastAPI container,
 `PICASSO_CORS_ORIGINS` can be the public origin of that container. If you
 put a load balancer or reverse proxy in front of it, use the HTTPS origin

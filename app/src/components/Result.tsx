@@ -3,6 +3,7 @@ import Button from "@mui/material/Button";
 import { Link, useNavigate } from "react-router-dom";
 import RestartAltIcon from "@mui/icons-material/RestartAltOutlined";
 import DownloadIcon from "@mui/icons-material/FileDownloadOutlined";
+import { INFERENCE_MAX_DIMENSION } from "../config";
 
 interface Props {
     resultUrl: string | undefined;
@@ -26,8 +27,8 @@ export const Result = ({ resultUrl, clearResult }: Props) => {
                 <p className="eyebrow">Output</p>
                 <h1 className="result__title">Stylized image</h1>
                 <p className="result__sub">
-                    Single feed&#8209;forward pass at 512&nbsp;px on the long
-                    edge.
+                    Single feed&#8209;forward pass at {INFERENCE_MAX_DIMENSION}
+                    &nbsp;px on the long edge.
                 </p>
             </header>
             <figure className="result__figure">

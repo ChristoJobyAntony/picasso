@@ -4,6 +4,12 @@ FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS frontend
 
 WORKDIR /frontend
 
+# Build-time pin of the model's long-edge inference size. Same env var the
+# Python backend reads at runtime, so a single value drives both the actual
+# resize behavior and the displayed copy.
+ARG PICASSO_INFERENCE_MAX_DIMENSION=512
+ENV PICASSO_INFERENCE_MAX_DIMENSION=$PICASSO_INFERENCE_MAX_DIMENSION
+
 COPY app/package*.json ./
 RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 

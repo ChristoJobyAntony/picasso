@@ -8,6 +8,7 @@ import UploadIcon from "@mui/icons-material/UploadFileOutlined";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import api, { StyleInfo } from "./api";
+import { INFERENCE_MAX_DIMENSION } from "../config";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg"];
@@ -115,8 +116,8 @@ export const Stylize = ({ setResultUrl }: Props) => {
                 <h1 className="stylize__title">Run the model</h1>
                 <p className="stylize__lede">
                     Pick a content image (your photo) and a style image (a
-                    painting). The network resizes inputs to 512&nbsp;px on the
-                    long edge before a single forward pass.
+                    painting). The network resizes inputs to {INFERENCE_MAX_DIMENSION}
+                    &nbsp;px on the long edge before a single forward pass.
                 </p>
             </header>
 

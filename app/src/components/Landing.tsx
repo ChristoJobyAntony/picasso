@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Button from "@mui/material/Button";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForwardOutlined";
+import { INFERENCE_MAX_DIMENSION } from "../config";
 
 const jsonLd = {
     "@context": "https://schema.org",
@@ -41,10 +42,10 @@ export const Landing = () => {
                         Picasso wraps Google Magenta&rsquo;s pretrained
                         arbitrary&#8209;stylization network behind a small web UI.
                         Give it a content image and a style image and it returns a
-                        single feed&#8209;forward composite at 512&nbsp;px. No
-                        diffusion, no semantic understanding &mdash; just classical
-                        neural style transfer from 2017, served as a thin FastAPI +
-                        React demo.
+                        single feed&#8209;forward composite at {INFERENCE_MAX_DIMENSION}
+                        &nbsp;px. No diffusion, no semantic understanding &mdash;
+                        just classical neural style transfer from 2017, served as
+                        a thin FastAPI + React demo.
                     </p>
                     <div className="landing__cta">
                         <Button
@@ -119,10 +120,10 @@ export const Landing = () => {
                         <span className="landing__step-num">03</span>
                         <h3>Resolution &amp; artifacts</h3>
                         <p>
-                            Inputs are resized to 512&nbsp;px on the long edge
-                            before inference. Expect softening of fine detail,
-                            occasional color drift, and texture leaking into flat
-                            regions. It&rsquo;s a 2017&#8209;era model that
+                            Inputs are resized to {INFERENCE_MAX_DIMENSION}&nbsp;px
+                            on the long edge before inference. Expect softening of
+                            fine detail, occasional color drift, and texture leaking
+                            into flat regions. It&rsquo;s a 2017&#8209;era model that
                             predates diffusion.
                         </p>
                     </li>

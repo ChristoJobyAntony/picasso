@@ -104,20 +104,25 @@ export const Stylize = ({ setResultUrl }: Props) => {
 
     return (
         <section className="stylize container">
-            <title>Stylize a photo — Picasso</title>
+            <title>Run the model &mdash; Picasso</title>
             <meta
                 name="description"
-                content="Upload your photo and choose a master painting to restyle it with neural style transfer."
+                content="Provide a content image and a style image to run feed-forward neural style transfer."
             />
             <meta name="robots" content="noindex" />
             <header className="stylize__head">
-                <p className="eyebrow">Compose your piece</p>
-                <h1 className="stylize__title">Make your masterpiece</h1>
+                <p className="eyebrow">Inputs</p>
+                <h1 className="stylize__title">Run the model</h1>
+                <p className="stylize__lede">
+                    Pick a content image (your photo) and a style image (a
+                    painting). The network resizes inputs to 512&nbsp;px on the
+                    long edge before a single forward pass.
+                </p>
             </header>
 
             <div className="stylize__grid">
                 <div className="stylize__col">
-                    <h2 className="stylize__col-title">Your photo</h2>
+                    <h2 className="stylize__col-title">Content image</h2>
                     <label
                         className={`dropzone${userImageUrl ? " dropzone--filled" : ""}${dragOver ? " dropzone--drag" : ""}`}
                         onDrop={onDrop}
@@ -164,7 +169,7 @@ export const Stylize = ({ setResultUrl }: Props) => {
                 </div>
 
                 <div className="stylize__col">
-                    <h2 className="stylize__col-title">Master</h2>
+                    <h2 className="stylize__col-title">Style image</h2>
                     <div className="picker">
                         <div className="picker__frame">
                             {activeStyle ? (
@@ -187,7 +192,7 @@ export const Stylize = ({ setResultUrl }: Props) => {
                                 onClick={onPrev}
                                 disabled={activeIndex === 0}
                                 size="medium"
-                                aria-label="Previous master"
+                                aria-label="Previous style image"
                             >
                                 <NavigateBeforeIcon />
                             </IconButton>
@@ -208,7 +213,7 @@ export const Stylize = ({ setResultUrl }: Props) => {
                                 onClick={onNext}
                                 disabled={activeIndex >= styles.length - 1}
                                 size="medium"
-                                aria-label="Next master"
+                                aria-label="Next style image"
                             >
                                 <NavigateNextIcon />
                             </IconButton>
@@ -231,7 +236,7 @@ export const Stylize = ({ setResultUrl }: Props) => {
                             sx={{ color: "var(--paper)" }}
                         />
                     ) : (
-                        "Stylize"
+                        "Run inference"
                     )}
                 </Button>
             </div>

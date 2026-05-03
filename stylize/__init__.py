@@ -74,7 +74,8 @@ class Model:
         self.hub_model = tf.saved_model.load(str(model_path))
 
     def stylize(self, content_image: tf.Tensor, style_image: tf.Tensor) -> PIL.Image:
-        """Stylizes an image using the model described by https://arxiv.org/abs/1508.06576.
+        """Stylizes a content image using a feed-forward arbitrary style transfer
+        network from Ghiasi et al. (2017), https://arxiv.org/abs/1705.06830.
 
         Inputs:
         - content_image : tf.Tensor

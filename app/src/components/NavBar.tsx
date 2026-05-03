@@ -15,7 +15,7 @@ export function NavBar() {
                     </span>
                     <span className="navbar__brand-name">Picasso</span>
                 </Link>
-                <p className="navbar__tag">Neural style transfer</p>
+                <p className="navbar__tag">Style transfer demo</p>
             </div>
             <hr className="rule" />
         </header>

@@ -1,3 +1,5 @@
+import os
+
 import tensorflow as tf
 import numpy as np
 import PIL.Image
@@ -6,7 +8,12 @@ from io import BytesIO
 from PIL import UnidentifiedImageError
 
 
-MAX_DIMENSION = 512
+# Long-edge size that inputs are resized to before inference. The Magenta
+# arbitrary-stylization network is fully convolutional, so this is configurable;
+# 512 px is the historical default and gives the best quality-per-CPU-second
+# ratio on small ARM instances. Going much above ~1024 px gives diminishing
+# visual returns because the model was trained at 256x256.
+MAX_DIMENSION = int(os.environ.get("PICASSO_INFERENCE_MAX_DIMENSION", 1536  ))
 
 
 def tensor_to_image(tensor: tf.Tensor) -> PIL.Image:

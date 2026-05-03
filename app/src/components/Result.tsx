@@ -20,16 +20,20 @@ export const Result = ({ resultUrl, clearResult }: Props) => {
 
     return (
         <section className="result container">
-            <title>Your masterpiece — Picasso</title>
+            <title>Output &mdash; Picasso</title>
             <meta name="robots" content="noindex" />
             <header className="result__head">
-                <p className="eyebrow">Your piece</p>
-                <h1 className="result__title">et Voil&agrave;</h1>
+                <p className="eyebrow">Output</p>
+                <h1 className="result__title">Stylized image</h1>
+                <p className="result__sub">
+                    Single feed&#8209;forward pass at 512&nbsp;px on the long
+                    edge.
+                </p>
             </header>
             <figure className="result__figure">
                 <img
                     src={resultUrl}
-                    alt="Your stylized image"
+                    alt="Stylized output of the model"
                     className="result__img"
                     decoding="async"
                 />
@@ -54,7 +58,7 @@ export const Result = ({ resultUrl, clearResult }: Props) => {
                     startIcon={<RestartAltIcon />}
                     size="large"
                 >
-                    Try another
+                    Run again
                 </Button>
             </div>
         </section>

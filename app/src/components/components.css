@@ -135,11 +135,39 @@
 }
 
 .landing__how-title {
-    margin: 0 0 var(--space-4);
+    margin: 0 0 var(--space-3);
     font-family: "Fraunces Variable", "Fraunces", Georgia, serif;
     font-size: clamp(1.5rem, 3vw, 2.25rem);
     font-weight: 500;
     letter-spacing: -0.01em;
+}
+
+.landing__how-lede {
+    margin: 0 0 var(--space-4);
+    max-width: 64ch;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+}
+
+.landing__credits {
+    padding-block: clamp(2rem, 6vw, 4rem);
+}
+
+.landing__credit-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-width: 72ch;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+}
+
+.landing__credit-list strong {
+    color: var(--ink);
+    font-weight: 500;
 }
 
 .landing__steps {
@@ -208,6 +236,13 @@
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 500;
     letter-spacing: -0.01em;
+}
+
+.stylize__lede {
+    margin: 0;
+    max-width: 64ch;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
 }
 
 .stylize__grid {
@@ -404,10 +439,15 @@
 .result__title {
     margin: 0;
     font-family: "Fraunces Variable", "Fraunces", Georgia, serif;
-    font-size: clamp(2.25rem, 5vw, 3.5rem);
+    font-size: clamp(2rem, 4.5vw, 3rem);
     font-weight: 500;
     letter-spacing: -0.01em;
-    font-style: italic;
+}
+
+.result__sub {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
 }
 
 .result__figure {

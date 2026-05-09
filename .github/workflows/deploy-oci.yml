@@ -49,14 +49,37 @@ jobs:
       # so React Router takes over.
       - run: cp build/index.html build/404.html
 
+      - name: Install OCI CLI
+        run: |
+          python3 -m pip install --upgrade --user oci-cli
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # Write the config + private key into ~/.oci. Done inline so we
+      # don't depend on a third-party GitHub Action that could break or
+      # be renamed. The heredoc avoids quoting issues with the multi-
+      # line PEM, and `chmod 600` is required — OCI CLI refuses to use
+      # a key file with looser permissions.
       - name: Configure OCI CLI
-        uses: oracle-actions/configure-oci-cli@v1.3.0
-        with:
-          user: ${{ secrets.OCI_USER_OCID }}
-          fingerprint: ${{ secrets.OCI_FINGERPRINT }}
-          tenancy: ${{ secrets.OCI_TENANCY_OCID }}
-          region: ${{ secrets.OCI_REGION }}
-          api_key: ${{ secrets.OCI_PRIVATE_KEY }}
+        env:
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.oci
+          printf '%s\n' "$OCI_PRIVATE_KEY" > ~/.oci/oci_api_key.pem
+          chmod 600 ~/.oci/oci_api_key.pem
+          cat > ~/.oci/config <<EOF
+          [DEFAULT]
+          user=$OCI_USER_OCID
+          fingerprint=$OCI_FINGERPRINT
+          tenancy=$OCI_TENANCY_OCID
+          region=$OCI_REGION
+          key_file=$HOME/.oci/oci_api_key.pem
+          EOF
+          chmod 600 ~/.oci/config
+          oci os ns get
 
       - name: Upload site
         working-directory: app/build

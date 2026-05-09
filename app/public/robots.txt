@@ -1,7 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /stylize
-Disallow: /stylizeb64
-Disallow: /healthz
+Disallow: /result
 
 Sitemap: https://picasso.example/sitemap.xml

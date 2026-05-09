@@ -8,3 +8,5 @@ pyvenv.cfg
 poetry.lock
 app/node_modules
 app/build/*
+app/.tsc-cache/
+*.tsbuildinfo

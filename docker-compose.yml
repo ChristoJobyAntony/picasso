@@ -3,24 +3,12 @@ services:
     build:
       context: .
       args:
-        # Drives both the bundled frontend copy and (via the runtime env var
-        # below) the actual backend resize. Set PICASSO_INFERENCE_MAX_DIMENSION
-        # in your shell to override the default of 512.
+        # Drives the bundled frontend copy ("inputs are resized to N px") and,
+        # since the Vite config reads it at build time, the model resize logic
+        # in app/src/lib/styleTransfer.ts. Inference runs in the browser, so
+        # there is no longer a runtime side to keep in sync.
         PICASSO_INFERENCE_MAX_DIMENSION: ${PICASSO_INFERENCE_MAX_DIMENSION:-512}
     image: picasso:arm64-local
     platform: linux/arm64/v8
     ports:
       - "8000:8000"
-    environment:
-      - TF_CPP_MIN_LOG_LEVEL=2
-      - KAGGLEHUB_CACHE=/model-cache
-      - KAGGLE_API_TOKEN
-      - PICASSO_CORS_ORIGINS=http://localhost:8000
-      - PICASSO_MAX_UPLOAD_BYTES=10485760
-      - PICASSO_MAX_IMAGE_PIXELS=12000000
-      - PICASSO_INFERENCE_MAX_DIMENSION=${PICASSO_INFERENCE_MAX_DIMENSION:-512}
-    volumes:
-      - picasso-model-cache:/model-cache
-
-volumes:
-  picasso-model-cache:

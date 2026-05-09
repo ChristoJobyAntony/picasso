@@ -7,7 +7,9 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "types": ["node"]
+    "types": ["node"],
+    "outDir": ".tsc-cache/node",
+    "tsBuildInfoFile": ".tsc-cache/node.tsbuildinfo"
   },
   "include": ["vite.config.ts"]
 }

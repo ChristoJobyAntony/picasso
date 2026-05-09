@@ -23,7 +23,10 @@ const useWideViewport = (): boolean => {
     return wide;
 };
 
-const SITE_URL = "https://christojobyantony.github.io/picasso/";
+// Update SITE_URL once your Cloudflare-fronted domain is live; the
+// placeholder is intentionally non-resolvable so a leaked draft can't
+// be mistaken for the real site.
+const SITE_URL = "https://picasso.example/";
 
 const jsonLd = {
     "@context": "https://schema.org",

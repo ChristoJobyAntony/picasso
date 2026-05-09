@@ -1,0 +1,104 @@
+name: Deploy to OCI Object Storage
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One in-flight deploy at a time, but don't kill a running upload — OCI
+# bulk-upload is not transactional and a half-aborted run leaves the
+# bucket in a mixed state.
+concurrency:
+  group: oci-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Pulls secrets from the `oci-production` environment, which is
+    # restricted to deploys from master in repo settings. Workflow runs
+    # from any other branch will fail at this gate before any OCI calls
+    # are made.
+    environment: oci-production
+    defaults:
+      run:
+        working-directory: app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - run: npm ci
+
+      - name: Build
+        env:
+          PICASSO_BASE_PATH: /
+          PICASSO_INFERENCE_MAX_DIMENSION: 512
+        run: npm run build
+
+      # SPA fallback: when a visitor refreshes /stylize directly, the
+      # Cloudflare Worker fronting the bucket can fall back to this file
+      # so React Router takes over.
+      - run: cp build/index.html build/404.html
+
+      - name: Configure OCI CLI
+        uses: oracle-actions/configure-oci-cli@v1.3.0
+        with:
+          user: ${{ secrets.OCI_USER_OCID }}
+          fingerprint: ${{ secrets.OCI_FINGERPRINT }}
+          tenancy: ${{ secrets.OCI_TENANCY_OCID }}
+          region: ${{ secrets.OCI_REGION }}
+          api_key: ${{ secrets.OCI_PRIVATE_KEY }}
+
+      - name: Upload site
+        working-directory: app/build
+        run: |
+          oci os object bulk-upload \
+            --bucket-name "${{ secrets.OCI_BUCKET_NAME }}" \
+            --namespace "${{ secrets.OCI_BUCKET_NAMESPACE }}" \
+            --src-dir . \
+            --overwrite \
+            --content-type auto \
+            --parallel-upload-count 8
+
+      # Vite content-hashes asset filenames, so old chunks pile up across
+      # deploys and slowly eat the 20 GiB Always-Free quota. Diff local
+      # vs remote and delete what's no longer in the build.
+      - name: Prune stale objects
+        working-directory: app/build
+        run: |
+          set -euo pipefail
+          find . -type f -printf '%P\n' | sort > /tmp/local.txt
+          oci os object list \
+            --bucket-name "${{ secrets.OCI_BUCKET_NAME }}" \
+            --namespace "${{ secrets.OCI_BUCKET_NAMESPACE }}" \
+            --all \
+            --query 'data[*].name' \
+            --raw-output 2>/dev/null \
+            | jq -r '.[]?' \
+            | sort > /tmp/remote.txt
+
+          comm -13 /tmp/local.txt /tmp/remote.txt > /tmp/stale.txt
+
+          stale_count=$(wc -l < /tmp/stale.txt | tr -d ' ')
+          if [ "$stale_count" -eq 0 ]; then
+            echo "Nothing to prune."
+            exit 0
+          fi
+          echo "Pruning $stale_count stale objects:"
+          cat /tmp/stale.txt
+          while IFS= read -r obj; do
+            oci os object delete \
+              --bucket-name "${{ secrets.OCI_BUCKET_NAME }}" \
+              --namespace "${{ secrets.OCI_BUCKET_NAMESPACE }}" \
+              --name "$obj" \
+              --force
+          done < /tmp/stale.txt

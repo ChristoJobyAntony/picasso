@@ -1,0 +1,16 @@
+# Copy to terraform.tfvars (gitignored) and fill in.
+# OCIDs come from OCI Console → top-right user menu / Tenancy details.
+
+tenancy_ocid               = "ocid1.tenancy.oc1..xxxxxxxx"
+bootstrap_user_ocid        = "ocid1.user.oc1..xxxxxxxx"
+bootstrap_fingerprint      = "12:34:56:78:90:ab:cd:ef:..."
+bootstrap_private_key_path = "~/.oci/oci_api_key.pem"
+
+region             = "ap-sydney-1"
+notification_email = "you@example.com"
+
+# Defaults below are fine; uncomment to override.
+# project_name        = "picasso"
+# bucket_name         = "picasso"
+# github_repo         = "ChristoJobyAntony/picasso"
+# monthly_budget_usd  = 1

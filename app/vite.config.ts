@@ -7,11 +7,11 @@ import react from "@vitejs/plugin-react";
 const inferenceMaxDimension =
     Number(process.env.PICASSO_INFERENCE_MAX_DIMENSION) || 512;
 
-// Public path the build is served from. Defaults to "/picasso/" for the
-// standard project-pages URL (https://<user>.github.io/picasso/). Override
-// with PICASSO_BASE_PATH="/" for a custom domain or a user/org pages repo.
-// Must start and end with "/".
-const basePath = process.env.PICASSO_BASE_PATH ?? "/picasso/";
+// Public path the build is served from. Defaults to "/" for OCI Object
+// Storage fronted by Cloudflare at the apex (or a subdomain). Override
+// with PICASSO_BASE_PATH if you ever serve from a subpath. Must start
+// and end with "/".
+const basePath = process.env.PICASSO_BASE_PATH ?? "/";
 
 export default defineConfig({
     base: basePath,

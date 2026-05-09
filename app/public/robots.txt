@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
-Disallow: /picasso/stylize
-Disallow: /picasso/result
+Disallow: /stylize
+Disallow: /result
 
-Sitemap: https://christojobyantony.github.io/picasso/sitemap.xml
+Sitemap: https://picasso.example/sitemap.xml

@@ -12,3 +12,12 @@ app/node_modules
 app/build/*
 app/.tsc-cache/
 *.tsbuildinfo
+
+# Terraform — local state and any private OCI inputs. The lockfile
+# (.terraform.lock.hcl) is intentionally NOT ignored: commit it so CI
+# and other contributors get the same provider versions.
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.backup
+infra/terraform/terraform.tfvars
+infra/terraform/*.tfplan

@@ -5,7 +5,9 @@
 // helper. There is no longer a backend API to call — inference runs entirely
 // in the browser via app/src/lib/styleTransfer.ts.
 
-const STYLES_BASE_URL = "/styles";
+// import.meta.env.BASE_URL is the Vite-resolved public base ("/" in dev,
+// "/picasso/" under GitHub Pages) and always ends with a trailing slash.
+const STYLES_BASE_URL = `${import.meta.env.BASE_URL}styles`;
 
 export interface StyleInfo {
     id: string;

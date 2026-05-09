@@ -1,0 +1,61 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master, main, frontend-inferencing]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One concurrent deployment, but don't cancel an in-flight one — Pages
+# rejects partial uploads.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - run: npm ci
+
+      - name: Build
+        env:
+          PICASSO_BASE_PATH: /picasso/
+          PICASSO_INFERENCE_MAX_DIMENSION: 512
+        run: npm run build
+
+      # SPA fallback: any unknown path under /picasso/ (e.g. a hard refresh
+      # on /picasso/stylize) gets the same index document, which then
+      # hands control to React Router.
+      - run: cp build/index.html build/404.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

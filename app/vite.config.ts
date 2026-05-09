@@ -7,7 +7,14 @@ import react from "@vitejs/plugin-react";
 const inferenceMaxDimension =
     Number(process.env.PICASSO_INFERENCE_MAX_DIMENSION) || 512;
 
+// Public path the build is served from. Defaults to "/picasso/" for the
+// standard project-pages URL (https://<user>.github.io/picasso/). Override
+// with PICASSO_BASE_PATH="/" for a custom domain or a user/org pages repo.
+// Must start and end with "/".
+const basePath = process.env.PICASSO_BASE_PATH ?? "/picasso/";
+
 export default defineConfig({
+    base: basePath,
     plugins: [react()],
     define: {
         __INFERENCE_MAX_DIMENSION__: JSON.stringify(inferenceMaxDimension),

@@ -23,6 +23,8 @@ const useWideViewport = (): boolean => {
     return wide;
 };
 
+const SITE_URL = "https://christojobyantony.github.io/picasso/";
+
 const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
@@ -30,8 +32,8 @@ const jsonLd = {
     description:
         "An interactive demo of Google Magenta's pretrained arbitrary image stylization network (Ghiasi et al., 2017).",
     programmingLanguage: ["TypeScript"],
-    codeRepository: "https://github.com/zahransajid/picasso",
-    url: "https://picasso.example/",
+    codeRepository: "https://github.com/ChristoJobyAntony/picasso",
+    url: SITE_URL,
 };
 
 export const Landing = () => {
@@ -43,7 +45,7 @@ export const Landing = () => {
                 name="description"
                 content="An interactive demo of Google Magenta's pretrained arbitrary image stylization network (Ghiasi et al., 2017). Feed-forward neural style transfer in the browser."
             />
-            <link rel="canonical" href="https://picasso.example/" />
+            <link rel="canonical" href={SITE_URL} />
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

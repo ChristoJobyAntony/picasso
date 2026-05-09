@@ -45,7 +45,7 @@ const App = () => {
                 autoHideDuration={2400}
                 anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             >
-                <BrowserRouter>
+                <BrowserRouter basename={import.meta.env.BASE_URL}>
                     <a className="skip-link" href="#main">
                         Skip to content
                     </a>

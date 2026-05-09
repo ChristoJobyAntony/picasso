@@ -1,6 +1,27 @@
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Button from "@mui/material/Button";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForwardOutlined";
+import { INFERENCE_MAX_DIMENSION } from "../config";
+
+// Decorative WebGL artifact: kept out of the main bundle, only loaded on
+// viewports wide enough to show it.
+const BrushstrokeField = lazy(() => import("./BrushstrokeField"));
+
+const useWideViewport = (): boolean => {
+    const [wide, setWide] = useState<boolean>(() =>
+        typeof window !== "undefined"
+            ? window.matchMedia("(min-width: 900px)").matches
+            : false
+    );
+    useEffect(() => {
+        const mq = window.matchMedia("(min-width: 900px)");
+        const handler = (e: MediaQueryListEvent) => setWide(e.matches);
+        mq.addEventListener("change", handler);
+        return () => mq.removeEventListener("change", handler);
+    }, []);
+    return wide;
+};
 
 const jsonLd = {
     "@context": "https://schema.org",
@@ -8,12 +29,13 @@ const jsonLd = {
     name: "Picasso",
     description:
         "An interactive demo of Google Magenta's pretrained arbitrary image stylization network (Ghiasi et al., 2017).",
-    programmingLanguage: ["Python", "TypeScript"],
+    programmingLanguage: ["TypeScript"],
     codeRepository: "https://github.com/zahransajid/picasso",
     url: "https://picasso.example/",
 };
 
 export const Landing = () => {
+    const showArtifact = useWideViewport();
     return (
         <div className="landing">
             <title>Picasso &mdash; a neural style transfer demo</title>
@@ -41,10 +63,10 @@ export const Landing = () => {
                         Picasso wraps Google Magenta&rsquo;s pretrained
                         arbitrary&#8209;stylization network behind a small web UI.
                         Give it a content image and a style image and it returns a
-                        single feed&#8209;forward composite at 512&nbsp;px. No
-                        diffusion, no semantic understanding &mdash; just classical
-                        neural style transfer from 2017, served as a thin FastAPI +
-                        React demo.
+                        single feed&#8209;forward composite at {INFERENCE_MAX_DIMENSION}
+                        &nbsp;px. No diffusion, no semantic understanding &mdash;
+                        just classical neural style transfer from 2017, running
+                        entirely in your browser via TensorFlow.js.
                     </p>
                     <div className="landing__cta">
                         <Button
@@ -58,11 +80,18 @@ export const Landing = () => {
                             Run the model
                         </Button>
                         <span className="landing__hint">
-                            Free &middot; runs server-side &middot;
-                            ~2&#8211;5&nbsp;s per image
+                            Free &middot; runs in&#8209;browser &middot; no
+                            uploads
                         </span>
                     </div>
                 </div>
+                {showArtifact && (
+                    <div className="landing__artifact" aria-hidden="true">
+                        <Suspense fallback={null}>
+                            <BrushstrokeField />
+                        </Suspense>
+                    </div>
+                )}
             </section>
 
             <hr className="rule" />
@@ -119,11 +148,13 @@ export const Landing = () => {
                         <span className="landing__step-num">03</span>
                         <h3>Resolution &amp; artifacts</h3>
                         <p>
-                            Inputs are resized to 512&nbsp;px on the long edge
-                            before inference. Expect softening of fine detail,
-                            occasional color drift, and texture leaking into flat
-                            regions. It&rsquo;s a 2017&#8209;era model that
-                            predates diffusion.
+                            Content is resized to {INFERENCE_MAX_DIMENSION}
+                            &nbsp;px on the long edge; the style image is
+                            squashed to 256&times;256 (the network&rsquo;s
+                            training resolution). Expect softening of fine
+                            detail, occasional color drift, and texture leaking
+                            into flat regions. It&rsquo;s a 2017&#8209;era
+                            model that predates diffusion.
                         </p>
                     </li>
                 </ol>
@@ -174,8 +205,9 @@ export const Landing = () => {
                         .
                     </li>
                     <li>
-                        <strong>This UI:</strong> a FastAPI + React wrapper.
-                        Source on GitHub.
+                        <strong>This UI:</strong> a static React app that runs
+                        the model in&#8209;browser via TensorFlow.js. Source on
+                        GitHub.
                     </li>
                 </ul>
             </section>

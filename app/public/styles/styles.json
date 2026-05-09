@@ -1,0 +1,56 @@
+[
+  {
+    "id": "001",
+    "title": "The Great Wave off Kanagawa",
+    "file": "Hokusai.jpg",
+    "description": "Katsushika Hokusai, c. 1831. Japanese woodblock; strong line and flat color regions."
+  },
+  {
+    "id": "002",
+    "title": "The Starry Night",
+    "file": "VanGogh.jpg",
+    "description": "Vincent van Gogh, 1889. Heavy impasto and swirling brushwork."
+  },
+  {
+    "id": "003",
+    "title": "The Water-Lily Pond",
+    "file": "Monet.jpg",
+    "description": "Claude Monet, c. 1899. Soft impressionist dapple in a pastel palette."
+  },
+  {
+    "id": "004",
+    "title": "The Kiss",
+    "file": "Klimt.jpg",
+    "description": "Gustav Klimt, 1908. Ornate gold-period patterning."
+  },
+  {
+    "id": "005",
+    "title": "Composition VII",
+    "file": "Kandinsky.jpg",
+    "description": "Wassily Kandinsky, 1913. Abstract geometric composition in primary colors."
+  },
+  {
+    "id": "006",
+    "title": "Portrait Pablo Picasso Painting",
+    "file": "Picasso1.jpg",
+    "description": "Pablo Picasso. Cubist portrait."
+  },
+  {
+    "id": "007",
+    "title": "Mandolin and Guitar",
+    "file": "Picasso2.jpg",
+    "description": "Pablo Picasso, 1924. A cubist still life of a mandolin and a guitar."
+  },
+  {
+    "id": "008",
+    "title": "Spider of the Evening",
+    "file": "Dali1.jpg",
+    "description": "Salvador Dalí, 1940. Surrealist scene with elongated figures and dreamlike landscape."
+  },
+  {
+    "id": "009",
+    "title": "Dalí",
+    "file": "Dali2.jpg",
+    "description": "Salvador Dalí. Surrealist composition."
+  }
+]

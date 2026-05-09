@@ -1,17 +1,13 @@
 [tool.poetry]
 name = "picasso"
-version = "0.1.0"
-description = "A beautiful project"
+version = "0.2.0"
+description = "Static file server for the Picasso style-transfer SPA. Inference runs client-side via TensorFlow.js."
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-tensorflow = "2.16.1"
 fastapi = "^0.115.0"
 uvicorn = {extras = ["standard"], version = "^0.30.6"}
-python-multipart = "^0.0.20"
-kagglehub = "^1.0.0"
-Pillow = "^10.4.0"
 
 [tool.poetry.dev-dependencies]
 

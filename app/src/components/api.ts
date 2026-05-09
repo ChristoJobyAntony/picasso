@@ -1,15 +1,11 @@
-import axios from "axios";
+// Static loader for style metadata + image paths.
+//
+// Both the styles.json index and the JPEGs themselves are served from
+// /public/styles, so this module is a thin wrapper around fetch and a path
+// helper. There is no longer a backend API to call — inference runs entirely
+// in the browser via app/src/lib/styleTransfer.ts.
 
-const apiBaseUrl =
-    typeof window !== "undefined" && window.location.port === "3000"
-        ? "http://localhost:8000/"
-        : "/";
-
-const baseApi = axios.create({
-    baseURL: apiBaseUrl,
-    timeout: 60000,
-    timeoutErrorMessage: "Network error — please try again.",
-});
+const STYLES_BASE_URL = "/styles";
 
 export interface StyleInfo {
     id: string;
@@ -18,33 +14,27 @@ export interface StyleInfo {
     description: string;
 }
 
-export const sendFiles = async (
-    image: File,
-    styleId: string
-): Promise<Blob> => {
-    const formData = new FormData();
-    formData.append("style", styleId);
-    formData.append("image", image);
-    const res = await baseApi.post("stylize", formData, {
-        responseType: "blob",
-        headers: {
-            Accept: "image/png",
-            "Content-Type": "multipart/form-data",
-        },
-    });
-    return res.data as Blob;
-};
+let stylesPromise: Promise<StyleInfo[]> | null = null;
 
 export const getStyles = async (): Promise<StyleInfo[]> => {
-    const res = await baseApi.get<StyleInfo[]>("styles/info");
-    return res.data;
+    if (!stylesPromise) {
+        stylesPromise = fetch(`${STYLES_BASE_URL}/styles.json`)
+            .then((res) => {
+                if (!res.ok) throw new Error(`styles.json: ${res.status}`);
+                return res.json() as Promise<StyleInfo[]>;
+            })
+            .catch((err) => {
+                stylesPromise = null;
+                throw err;
+            });
+    }
+    return stylesPromise;
 };
 
-export const getStyleImagePath = (styleId: string): string =>
-    `${baseApi.defaults.baseURL}styles/image/${styleId}`;
+export const getStyleImagePath = (style: StyleInfo): string =>
+    `${STYLES_BASE_URL}/${style.file}`;
 
 export default {
-    sendFiles,
     getStyles,
     getStyleImagePath,
 };

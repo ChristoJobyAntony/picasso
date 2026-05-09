@@ -45,14 +45,14 @@ resource "cloudflare_pages_project" "site" {
       # Node.
       environment_variables = {
         PICASSO_BASE_PATH               = "/"
-        PICASSO_INFERENCE_MAX_DIMENSION = "512"
+        PICASSO_INFERENCE_MAX_DIMENSION = tostring(var.inference_max_dimension)
         NODE_VERSION                    = "20"
       }
     }
     preview {
       environment_variables = {
         PICASSO_BASE_PATH               = "/"
-        PICASSO_INFERENCE_MAX_DIMENSION = "512"
+        PICASSO_INFERENCE_MAX_DIMENSION = tostring(var.inference_max_dimension)
         NODE_VERSION                    = "20"
       }
     }

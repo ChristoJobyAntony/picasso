@@ -54,3 +54,16 @@ variable "project_name" {
   type        = string
   default     = "picasso"
 }
+
+# --- Build-time env vars ------------------------------------------------
+
+variable "inference_max_dimension" {
+  description = "Long-edge cap (px) the in-browser TF.js model resizes content to before inference. Lower = faster + less memory; higher = more detail. Baked into the bundle by Vite at build time, so changing it triggers a fresh Pages deploy."
+  type        = number
+  default     = 512
+
+  validation {
+    condition     = var.inference_max_dimension >= 256 && var.inference_max_dimension <= 1024
+    error_message = "inference_max_dimension must be between 256 and 1024 — below that loses too much detail, above that risks WebGL texture limits on mobile."
+  }
+}

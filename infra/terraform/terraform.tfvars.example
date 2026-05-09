@@ -18,8 +18,9 @@ cloudflare_zone_id    = "your-32-char-zone-id"
 cloudflare_zone_name  = "christojobyantony.me"
 
 # Defaults below are fine; uncomment to override.
-# project_name      = "picasso"
-# site_subdomain    = "picasso"        # use "@" for apex
-# production_branch = "master"
-# github_owner      = "ChristoJobyAntony"
-# github_repo_name  = "picasso"
+# project_name             = "picasso"
+# site_subdomain           = "picasso"        # use "@" for apex
+# production_branch        = "master"
+# github_owner             = "ChristoJobyAntony"
+# github_repo_name         = "picasso"
+# inference_max_dimension  = 512              # 256-1024; long-edge px the TF.js model resizes content to

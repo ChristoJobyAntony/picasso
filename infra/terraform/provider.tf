@@ -1,11 +1,6 @@
-# The bootstrap user (your admin) runs `terraform apply` once to create the
-# project compartment, the deploy user, and the bucket. After that the
-# deploy user takes over via GitHub Actions and never needs to touch
-# terraform again.
-provider "oci" {
-  tenancy_ocid     = var.tenancy_ocid
-  user_ocid        = var.bootstrap_user_ocid
-  fingerprint      = var.bootstrap_fingerprint
-  private_key_path = var.bootstrap_private_key_path
-  region           = var.region
+# Cloudflare hosts the site (Pages), terminates TLS, and serves the
+# custom domain. No other cloud is involved — Pages clones the GitHub
+# repo, runs the build, and serves the output from its edge.
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
 }

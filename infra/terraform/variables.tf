@@ -1,63 +1,56 @@
-# --- Bootstrap user (you, running terraform apply) ----------------------
-# These come from your existing OCI admin user. Generate the API key
-# pair via `oci setup keys` if you don't have one.
+# --- Cloudflare credentials --------------------------------------------
 
-variable "tenancy_ocid" {
-  description = "OCI tenancy OCID. From: Console > Profile > Tenancy."
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token. Needs Account.Cloudflare Pages:Edit, Zone.DNS:Edit, and Zone.Zone:Read on the target account/zone."
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudflare_account_id" {
+  description = "Cloudflare account ID (right sidebar of any zone overview, or `Account ID` under Workers & Pages)."
   type        = string
 }
 
-variable "bootstrap_user_ocid" {
-  description = "OCID of the OCI admin user running terraform apply."
+variable "cloudflare_zone_name" {
+  description = "Cloudflare zone (apex domain) hosting the site, e.g. 'christojobyantony.me'. Used to build the site hostname."
   type        = string
 }
 
-variable "bootstrap_fingerprint" {
-  description = "Fingerprint of the API key for the bootstrap user."
+variable "cloudflare_zone_id" {
+  description = "Cloudflare zone ID (right sidebar of the zone overview page). Passed directly to avoid needing Zone:Zone:Read on the API token."
   type        = string
 }
 
-variable "bootstrap_private_key_path" {
-  description = "Path to the PEM private key for the bootstrap user."
+variable "site_subdomain" {
+  description = "Subdomain to expose the site at — e.g. 'picasso' produces picasso.<zone>. Set to '@' for apex."
   type        = string
-  default     = "~/.oci/oci_api_key.pem"
+  default     = "picasso"
 }
 
-variable "region" {
-  description = "OCI region key. Must be your home region for Always Free resources."
+# --- GitHub source repo -------------------------------------------------
+
+variable "github_owner" {
+  description = "GitHub user/org that owns the repo Cloudflare Pages builds from."
   type        = string
-  default     = "ap-sydney-1"
+  default     = "ChristoJobyAntony"
 }
 
-# --- Project knobs --------------------------------------------------------
+variable "github_repo_name" {
+  description = "Repo name (without owner) Cloudflare Pages builds from."
+  type        = string
+  default     = "picasso"
+}
+
+variable "production_branch" {
+  description = "Branch that triggers production deployments. All other branches build as previews unless previews are disabled."
+  type        = string
+  default     = "master"
+}
+
+# --- Project knobs ------------------------------------------------------
 
 variable "project_name" {
-  description = "Short identifier baked into resource names."
+  description = "Cloudflare Pages project name. Becomes <name>.pages.dev."
   type        = string
   default     = "picasso"
-}
-
-variable "bucket_name" {
-  description = "Object Storage bucket name. Must be unique within the namespace."
-  type        = string
-  default     = "picasso"
-}
-
-variable "github_repo" {
-  description = "owner/repo of the GitHub repository, recorded on the deploy user for documentation."
-  type        = string
-  default     = "ChristoJobyAntony/picasso"
-}
-
-# --- Budget guardrails ----------------------------------------------------
-
-variable "notification_email" {
-  description = "Email address to receive budget alerts."
-  type        = string
-}
-
-variable "monthly_budget_usd" {
-  description = "Monthly soft cap for budget alerts. Always-Free resources cost zero, so any actual spend means you've exited the free tier."
-  type        = number
-  default     = 1
 }

@@ -6,8 +6,8 @@ import { setWasmPaths } from "@tensorflow/tfjs-backend-wasm";
 import "@tensorflow/tfjs-backend-wasm";
 import { loadGraphModel, GraphModel } from "@tensorflow/tfjs-converter";
 
-// Bundle the WASM binaries locally via Vite ?url so the OCI box can stay a
-// pure static server with no CDN runtime dependency.
+// Bundle the WASM binaries locally via Vite ?url so the static host
+// has no CDN runtime dependency.
 import wasmUrl from "@tensorflow/tfjs-backend-wasm/dist/tfjs-backend-wasm.wasm?url";
 import wasmSimdUrl from "@tensorflow/tfjs-backend-wasm/dist/tfjs-backend-wasm-simd.wasm?url";
 import wasmThreadedSimdUrl from "@tensorflow/tfjs-backend-wasm/dist/tfjs-backend-wasm-threaded-simd.wasm?url";

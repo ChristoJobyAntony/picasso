@@ -1,16 +1,25 @@
 # Copy to terraform.tfvars (gitignored) and fill in.
-# OCIDs come from OCI Console → top-right user menu / Tenancy details.
 
-tenancy_ocid               = "ocid1.tenancy.oc1..xxxxxxxx"
-bootstrap_user_ocid        = "ocid1.user.oc1..xxxxxxxx"
-bootstrap_fingerprint      = "12:34:56:78:90:ab:cd:ef:..."
-bootstrap_private_key_path = "~/.oci/oci_api_key.pem"
+# --- Cloudflare ---
+# Create a token at https://dash.cloudflare.com/profile/api-tokens
+# Permissions:
+#   Account.Cloudflare Pages : Edit
+#   Zone.DNS                 : Edit
+# Account resources : Include : <your account>
+# Zone resources    : Include : Specific zone : christojobyantony.me
+#
+# cloudflare_account_id and cloudflare_zone_id come from the Cloudflare
+# dashboard — both are shown in the right sidebar of any zone's
+# overview page.
 
-region             = "ap-sydney-1"
-notification_email = "you@example.com"
+cloudflare_api_token  = "your-cloudflare-api-token"
+cloudflare_account_id = "your-32-char-account-id"
+cloudflare_zone_id    = "your-32-char-zone-id"
+cloudflare_zone_name  = "christojobyantony.me"
 
 # Defaults below are fine; uncomment to override.
-# project_name        = "picasso"
-# bucket_name         = "picasso"
-# github_repo         = "ChristoJobyAntony/picasso"
-# monthly_budget_usd  = 1
+# project_name      = "picasso"
+# site_subdomain    = "picasso"        # use "@" for apex
+# production_branch = "master"
+# github_owner      = "ChristoJobyAntony"
+# github_repo_name  = "picasso"

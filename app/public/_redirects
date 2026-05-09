@@ -1,0 +1,6 @@
+# Cloudflare Pages SPA fallback. Any path that doesn't match a built
+# asset is rewritten (status 200, NOT a redirect) to /index.html so
+# React Router takes over. The 200 status is what makes this a
+# "rewrite" rather than a 301/302.
+
+/*    /index.html    200
